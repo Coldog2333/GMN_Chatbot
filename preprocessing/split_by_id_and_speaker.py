@@ -1,4 +1,3 @@
-# For the dataset of ../data/healthcaremagic_dialogue_[1-4].txt
 import pandas as pd
 import re
 from itertools import cycle
@@ -19,7 +18,11 @@ def split_by_id_and_speaker(data_filename, output_filename):
     """
     # Available speakers (cycle for convenient switching)
     speakers = cycle(['patient', 'doctor'])
-    # Dict containing words for ending check for each speaker
+    # Dict containing words for starting and ending check for each speaker
+    starting_words = dict(
+        doctor = ['Q. '],
+        patient = ['Q. ']
+    )
     ending_words = dict(
         doctor = ['Take care', 'Hope I', 'Regards', 'Thank you,' 'Thank you.'],
         patient = ['Thank you,', 'Thank you.', 'Thanks']
@@ -33,9 +36,11 @@ def split_by_id_and_speaker(data_filename, output_filename):
         current_speaker = None  # track current speaker (patient or doctor)
         for line in f_data:
             # Detect id and speaker (id -> patient, 'Doctor' -> doctor)
-            if line.startswith('id=') or line == 'Doctor:\n': 
-                if line.startswith('id='): current_idx = line[3:-1] 
-                if current_speaker: closing_line()
+            if 'id=' in line or line == 'Doctor:\n': 
+                if 'id=' in line: 
+                    current_idx = line.split('id=')[1][:-1] 
+                if current_speaker: 
+                    closing_line()
                 current_speaker = next(speakers) # switch speaker
                 f_out.write(f'{current_idx},{current_speaker},"') # Opening " mark of the next dialogue
                 start = True # Flag for start of the dialogue
@@ -49,7 +54,14 @@ def split_by_id_and_speaker(data_filename, output_filename):
                         continue
 
                 # Get rid of unnecessary characters
-                line = re.sub(r'\n|(\.{2,})', '', line).strip() 
+                line = re.sub(r'\n|([\.\,]{2,})', '', line).strip() # Drop \n and ....,,,,,
+                url_regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+                line = re.sub(url_regex, '', line).strip()
+
+                # Dialogue beginning check
+                for starting_word in starting_words[current_speaker]:
+                    if line.startswith(starting_word):
+                        line = line.split(starting_word)[1]
 
                 # Dialogue ending check
                 for ending_word in ending_words[current_speaker]:
@@ -74,5 +86,8 @@ def split_by_id_and_speaker(data_filename, output_filename):
 
 # Main loop
 if __name__ == '__main__':
+    # Health care magic
     for i in range(1, 5):
-        split_by_id_and_speaker(f'../data/healthcaremagic_dialogue_{i}.txt', f'splitted_by_id_and_speaker_{i}.csv')
+        split_by_id_and_speaker(f'../data/healthcaremagic_dialogue_{i}.txt', f'../data/healthcaremagic_splitted_idname_{i}.csv')
+    # Icliniq
+    split_by_id_and_speaker('../data/icliniq_dialogue.txt', '../data/icliniq_splitted_idname.csv')
