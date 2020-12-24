@@ -9,12 +9,12 @@ def split_by_id_and_speaker(data_filename, output_filename):
     """
     Split dialogues by id and speaker (i.e., patient and doctor) with some cleaning
     
-    Output filename format: (idx, speaker, "dialogue")
+    Output filename format: each row is (idx, speaker, "dialogue")
     E.g.
     0, patient0, "#description0 #patient0_dialogue"
     0, doctor0, "#doctor0_dialogue"
-    1, patient0, "#description0 #patient0_dialogue"
-    1, doctor0, "#doctor0_dialogue"
+    1, patient1, "#description1 #patient1_dialogue"
+    1, doctor1, "#doctor1_dialogue"
     ...
     """
     # Available speakers (cycle for convenient switching)
