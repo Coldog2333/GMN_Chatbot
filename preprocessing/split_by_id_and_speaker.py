@@ -1,3 +1,4 @@
+# For the dataset of ../data/healthcaremagic_dialogue_[1-4].txt
 import pandas as pd
 import re
 from itertools import cycle
@@ -5,6 +6,17 @@ import warnings
 warnings.filterwarnings('ignore')
 
 def split_by_id_and_speaker(data_filename, output_filename):
+    """
+    Split dialogues by id and speaker (i.e., patient and doctor) with some cleaning
+    
+    Output filename format: (idx, speaker, "dialogue")
+    E.g.
+    0, patient0, "#description0 #patient0_dialogue"
+    0, doctor0, "#doctor0_dialogue"
+    1, patient0, "#description0 #patient0_dialogue"
+    1, doctor0, "#doctor0_dialogue"
+    ...
+    """
     # Available speakers (cycle for convenient switching)
     speakers = cycle(['patient', 'doctor'])
     # Dict containing words for ending check for each speaker
