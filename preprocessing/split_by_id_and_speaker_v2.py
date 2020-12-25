@@ -22,7 +22,7 @@ def split_by_id_and_speaker(data_filename, output_filename):
     starting_words = dict(
         doctor = ['Q. '],
         patient = ['Q. '],
-        description = [],
+        description = ['Q. '],
     )
     ending_words = dict(
         doctor = ['Take care', 'Hope I', 'Regards', 'Thank you,' 'Thank you.'],
@@ -35,10 +35,6 @@ def split_by_id_and_speaker(data_filename, output_filename):
         'speaker':[],
         'context':[]
     }
-    # Closing line function
-    def closing_line():
-        # f_out.write('"\n') # Closing " mark of the previous dialogue and begin a new line
-        pass
 
     # Main function content
     with open(output_filename, 'a+') as f_out, open(data_filename) as f_data:
@@ -54,6 +50,7 @@ def split_by_id_and_speaker(data_filename, output_filename):
                 contexts = []
 
             if 'id=' in line: 
+                in_dialogue = False
                 current_idx = line.split('id=')[1][:-1] 
 
             if line in speaker_tags: 
