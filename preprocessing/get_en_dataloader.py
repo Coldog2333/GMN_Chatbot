@@ -46,11 +46,11 @@ class ENMedicDialogueDataset(Dataset):
         '''
         current_len = len(inp['input_ids'][0])
         if current_len < max_length:
-            for key, val in inp.items():
+            for key, _ in inp.items():
                 for idx in range(self.__len__()):
                     inp[key][idx] += (max_length - current_len) * [0]
         elif current_len > max_length:
-            for key, val in inp.items():
+            for key, _ in inp.items():
                 for idx in range(self.__len__()):
                     inp[key][idx] = inp[key][idx][:max_length]
 
@@ -96,7 +96,7 @@ def merge_batchencoder(
             left_batchencoder[key] += right_batchencoders[key]
 
 
-def get_training_val_test_dataloader(debugging=False) -> Tuple[BatchEncoding, BatchEncoding, BatchEncoding]:
+def get_training_dev_test_dataloader(debugging=False, max_length=256) -> Tuple[BatchEncoding, BatchEncoding, BatchEncoding]:
     '''
     Build the dataloader train, dev, and test
     For simplicity, we will specify
@@ -113,8 +113,8 @@ def get_training_val_test_dataloader(debugging=False) -> Tuple[BatchEncoding, Ba
     - icliniq_splitted_idname
     '''
     import pickle
+    MAX_LENGTH = 256
     data_path = "data"
-    max_length = 256
     roles = ['description', 'patient', 'doctor']
     filename_list = {
         'train': [
@@ -143,7 +143,7 @@ def get_training_val_test_dataloader(debugging=False) -> Tuple[BatchEncoding, Ba
     for data_type, filenames in filename_list.items():
         for filename in filenames:
             for role in roles:
-                with open(f"{data_path}/{filename}_{max_length}_{role}.pkl", 'rb') as f:
+                with open(f"{data_path}/{filename}_{MAX_LENGTH}_{role}.pkl", 'rb') as f:
                     batch_encoder = pickle.load(f)
                 if batchencoder_bucket[data_type][f'{role}s'] is None:
                     batchencoder_bucket[data_type][f'{role}s'] = batch_encoder
@@ -152,13 +152,16 @@ def get_training_val_test_dataloader(debugging=False) -> Tuple[BatchEncoding, Ba
                         batchencoder_bucket[data_type][f'{role}s'], batch_encoder)
 
     train_loader = ENMedicDialogueDataset(
-        **batchencoder_bucket['train']
+        **batchencoder_bucket['train'],
+        max_length=max_length
     )
     dev_loader = ENMedicDialogueDataset(
-        **batchencoder_bucket['dev']
+        **batchencoder_bucket['dev'],
+        max_length=max_length
     )
     test_loader = ENMedicDialogueDataset(
-        **batchencoder_bucket['test']
+        **batchencoder_bucket['test'],
+        max_length=max_length
     )
 
     return train_loader, dev_loader, test_loader
