@@ -26,6 +26,19 @@ train_loader, dev_loader, test_loader = get_training_dev_test_dataloader(debuggi
 
 print(train_loader[0])
 ```
+Note that the data is split by the following
+```
+Train:
+    - data/healthcaremagic_splitted_idname_1.csv
+    - data/healthcaremagic_splitted_idname_2.csv
+    - data/healthcaremagic_splitted_idname_3.csv
+
+Dev:
+    - data/healthcaremagic_splitted_idname_4.csv
+
+Test:
+    - data/icliniq_splitted_idname.csv
+```
 - The dataloader will return the following dictionary for each different index
 ```
 Dict{
@@ -38,4 +51,6 @@ Dict{
 
 }
 ```
-Note that negative samples are sampled by randomly chosen from different response in other conversation.
+There are 2 things to note here,
+- In all samples there are description, patient response and doctor response, in total 3-turns dialogue. So here, we treat the description and patient as first 2-turns dialogue and ask the model to output the probability of the third turn
+- the negative samples are sampled by randomly chosen from different response in other conversation.
