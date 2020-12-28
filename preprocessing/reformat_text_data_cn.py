@@ -50,8 +50,13 @@ def split_by_id_and_speaker(data_filename, output_filename):
 
             if in_dialogue and (line in speaker_tags or line == "\n"):
                 in_dialogue = False
+                df_dict['dialogue_id'].append(current_idx)
+                df_dict['speaker'].append(current_speaker)
                 df_dict['context'].append(' '.join(contexts))
                 contexts = []
+                if len(df_dict['speaker']) != len(df_dict['context']):
+                    print(f"{current_idx}, {len(df_dict['speaker'])} len(df_dict['context'])")
+                    pass
 
             if 'id=' in line:
                 in_dialogue = False
@@ -68,8 +73,6 @@ def split_by_id_and_speaker(data_filename, output_filename):
 
                 # current_speaker = next(speakers) # switch speaker
                 # f_out.write(f'{current_idx},{current_speaker},"') # Opening " mark of the next dialogue
-                df_dict['dialogue_id'].append(current_idx)
-                df_dict['speaker'].append(current_speaker)
                 start = True  # Flag for start of the dialogue
                 continue
 
@@ -92,6 +95,8 @@ def split_by_id_and_speaker(data_filename, output_filename):
                         line = line.split(ending_word)[0]
 
                 contexts.append(line)
+
+        print(len(df_dict['dialogue_id']), len(df_dict['speaker']), len(df_dict['context']))
 
         pd.DataFrame(df_dict).to_csv(output_filename, index=False)
 
@@ -139,8 +144,8 @@ def pretokenize_dataset() -> None:
 # Main loop
 if __name__ == '__main__':
     # Chinese dataset
-    for year in range(2011, 2021):
-        file = f"data/{year}_split_by_idname.txt"
+    for year in [2011,2012,2013,2015,2016,2017,2019,2020]:
+        file = f"data/{year}.txt"
         if not os.path.isfile(f"data/{year}_split_by_idname.csv"):
             split_by_id_and_speaker(
                 file, f"data/{year}_split_by_idname.csv")
