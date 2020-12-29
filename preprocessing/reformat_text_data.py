@@ -46,15 +46,17 @@ def split_by_id_and_speaker(data_filename, output_filename):
         current_speaker = None  # track current speaker (patient or doctor)
         in_dialogue = False  # Flag that currently in the dialouge
         contexts = []
+        current_idx = -1
         for line in f_data:
             # Detect id and speaker (id -> patient, 'Doctor' -> doctor)
-
-            if in_dialogue and (line in speaker_tags or line == "\n"):
+            if in_dialogue and (line in speaker_tags or line.strip(' ') == "\n"):
                 in_dialogue = False
+                df_dict['dialogue_id'].append(current_idx)
+                df_dict['speaker'].append(current_speaker)
                 df_dict['context'].append(' '.join(contexts))
                 contexts = []
 
-            if 'id=' in line:
+            if 'id=' in line[:3]:
                 in_dialogue = False
                 current_idx = line.split('id=')[1][:-1]
 
@@ -71,8 +73,6 @@ def split_by_id_and_speaker(data_filename, output_filename):
 
                 # current_speaker = next(speakers) # switch speaker
                 # f_out.write(f'{current_idx},{current_speaker},"') # Opening " mark of the next dialogue
-                df_dict['dialogue_id'].append(current_idx)
-                df_dict['speaker'].append(current_speaker)
                 start = True  # Flag for start of the dialogue
                 continue
 
@@ -96,6 +96,7 @@ def split_by_id_and_speaker(data_filename, output_filename):
 
                 contexts.append(line)
 
+        print(len(df_dict['dialogue_id']), len(df_dict['speaker']), len(df_dict['context']))
         pd.DataFrame(df_dict).to_csv(output_filename, index=False)
 
 
