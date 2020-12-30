@@ -1,7 +1,10 @@
 data/
+results/
+logs/
+
 
 # VSCode ignore
-.vscode/*
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json

@@ -105,7 +105,8 @@ def pretokenize_dataset() -> None:
     After finishing generate the messy text into CSV,
     we tokenize the text and save them as objects
     '''
-    files = ["data/healthcaremagic_splitted_idname_1.csv",
+    files = [
+            "data/healthcaremagic_splitted_idname_1.csv",
              "data/healthcaremagic_splitted_idname_2.csv",
              "data/healthcaremagic_splitted_idname_3.csv",
              "data/healthcaremagic_splitted_idname_4.csv",
@@ -119,9 +120,10 @@ def pretokenize_dataset() -> None:
     for file in files:
         df = pd.read_csv(file)
         df.fillna('', inplace=True)
-        df_description = df[df.speaker == "description"]
-        df_patient = df[df.speaker == "patient"]
-        df_doctor = df[df.speaker == "doctor"]
+        df_description = df[df.speaker == "description"].drop_duplicates('dialogue_id')
+        df_patient = df[df.speaker == "patient"].drop_duplicates('dialogue_id')
+        df_doctor = df[df.speaker == "doctor"].drop_duplicates('dialogue_id')
+        print(len(df_description), len(df_patient), len(df_doctor))
         for max_length in max_lengths:
 
             file_name = file.split("/")[1][:-4]

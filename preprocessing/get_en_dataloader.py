@@ -31,6 +31,7 @@ class ENMedicDialogueDataset(Dataset):
         self.descriptions = descriptions.copy()
         self.patients = patients.copy()
         self.doctors = doctors.copy()
+        print(len(self))
 
         # Usually description length might be shorter
         self.__trim_or_pad_input(self.descriptions, max_length)
@@ -44,14 +45,13 @@ class ENMedicDialogueDataset(Dataset):
         Trim or pad the input dict into the specified length
         This modifies the dictionary inplace
         '''
-        current_len = len(inp['input_ids'][0])
-        if current_len < max_length:
+        
+        for idx in range(self.__len__()):
             for key, _ in inp.items():
-                for idx in range(self.__len__()):
+                current_len = len(inp[key][idx])
+                if current_len < max_length:
                     inp[key][idx] += (max_length - current_len) * [0]
-        elif current_len > max_length:
-            for key, _ in inp.items():
-                for idx in range(self.__len__()):
+                elif current_len > max_length:
                     inp[key][idx] = inp[key][idx][:max_length]
 
     def __getitem__(self, idx):
@@ -62,6 +62,7 @@ class ENMedicDialogueDataset(Dataset):
         '''
 
         # 2 x MAX_LENGTH tensor of description and patients response
+            
         item = {key: torch.tensor([self.descriptions[key][idx], self.patients[key][idx]])
                 for key, val in self.descriptions.items()}
         idxs = np.random.randint(0, self.__len__(), self.neg_samples)
@@ -78,7 +79,7 @@ class ENMedicDialogueDataset(Dataset):
         return {**item, **doctor_choices}
 
     def __len__(self):
-        return len(self.descriptions)
+        return len(self.descriptions['input_ids'])
 
 
 def merge_batchencoder(
@@ -96,7 +97,7 @@ def merge_batchencoder(
             left_batchencoder[key] += right_batchencoders[key]
 
 
-def get_training_dev_test_dataloader(debugging=False, max_length=256) -> Tuple[BatchEncoding, BatchEncoding, BatchEncoding]:
+def get_training_dev_test_dataset(debugging=False, max_length=256) -> Tuple[BatchEncoding, BatchEncoding, BatchEncoding]:
     '''
     Build the dataloader train, dev, and test
     For simplicity, we will specify
