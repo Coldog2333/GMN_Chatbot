@@ -63,3 +63,6 @@ Dict{
 There are 2 things to note here,
 - In all samples there are description, patient response and doctor response, in total 3-turns dialogue. So here, we treat the description and patient as first 2-turns dialogue and ask the model to output the probability of the third turn
 - the negative samples are sampled by randomly chosen from different response in other conversation. **The correct response is always in the first index(0)** and followed by `#negative_sample` number of wrong response.
+
+## BERT Baseline
+![Alt text](BERT_architecture.jpeg?raw=true "Optional Title")
