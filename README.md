@@ -20,12 +20,21 @@ python preprocessing/reformat_text_data.py
 ```
 - To get the (pytorch)dataloader, import from the following module. Note that the tokenization was done by huggingface `bert-base-uncased` tokenizer and the maximum length default is 256
 ```python
-from preprocessing.get_en_dataloader import get_training_dev_test_dataloader
+from preprocessing.get_en_dataloader import get_training_dev_test_dataset
 
-train_loader, dev_loader, test_loader = get_training_dev_test_dataloader(debugging=False, max_length=256)
+train_dataset, dev_dataset, test_dataset = get_training_dev_test_dataset(debugging=False, max_length=256)
 
 print(train_loader[0])
 ```
+which the dataset can be used in [Huggingface trainer](https://huggingface.co/transformers/main_classes/trainer.html#transformers.Trainer). In case of manual training, please wrap it with pytorch dataloader
+```python
+from torch.utils.data import DataLoader
+
+# For train loader
+train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+```
+
+## Default Data split
 Note that the data is split by the following
 ```
 Train:
@@ -47,10 +56,10 @@ Dict{
     'attention_mask': same,
     'doctor_input_ids': tensor(#negative_sample + 1, max_length),
     'doctor_token_type_ids': same,
-    'doctor_ dattention_mask': same,
+    'doctor_attention_mask': same,
 
 }
 ```
 There are 2 things to note here,
 - In all samples there are description, patient response and doctor response, in total 3-turns dialogue. So here, we treat the description and patient as first 2-turns dialogue and ask the model to output the probability of the third turn
-- the negative samples are sampled by randomly chosen from different response in other conversation.
+- the negative samples are sampled by randomly chosen from different response in other conversation. **The correct response is always in the first index(0)** and followed by `#negative_sample` number of wrong response.
