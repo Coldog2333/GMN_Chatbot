@@ -2,6 +2,8 @@ data/
 results/
 logs/
 
+# PyCharm ignore
+*.idea/
 
 # VSCode ignore
 .vscode/

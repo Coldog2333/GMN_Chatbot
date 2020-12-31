@@ -18,42 +18,61 @@ def split_by_id_and_speaker(data_filename, output_filename):
     ...
     """
     # Available speakers (cycle for convenient switching)
-    speakers = cycle(['patient', 'doctor'])
+    speaker_tags = ['Doctor:\n', 'Patient:\n', 'Description\n']
     # Dict containing words for starting and ending check for each speaker
     starting_words = dict(
         doctor = ['Q. '],
-        patient = ['Q. ']
+        patient = ['Q. '],
+        description = ['Q. '],
     )
     ending_words = dict(
         doctor = ['Take care', 'Hope I', 'Regards', 'Thank you,' 'Thank you.'],
-        patient = ['Thank you,', 'Thank you.', 'Thanks']
+        patient = ['Thank you,', 'Thank you.', 'Thanks'],
+        description = [],
     )
-    # Closing line function
-    def closing_line():
-        f_out.write('"\n') # Closing " mark of the previous dialogue and begin a new line
+
+    df_dict = {
+        'dialogue_id':[],
+        'speaker':[],
+        'context':[]
+    }
 
     # Main function content
     with open(output_filename, 'a+') as f_out, open(data_filename) as f_data:
         current_speaker = None  # track current speaker (patient or doctor)
+        in_dialogue = False # Flag that currently in the dialouge
+        contexts = []
         for line in f_data:
             # Detect id and speaker (id -> patient, 'Doctor' -> doctor)
-            if 'id=' in line or line == 'Doctor:\n': 
-                if 'id=' in line: 
-                    current_idx = line.split('id=')[1][:-1] 
-                if current_speaker: 
-                    closing_line()
-                current_speaker = next(speakers) # switch speaker
-                f_out.write(f'{current_idx},{current_speaker},"') # Opening " mark of the next dialogue
+            
+            if in_dialogue and (line in speaker_tags or line == "\n"):
+                in_dialogue = False
+                df_dict['context'].append(' '.join(contexts))
+                contexts = []
+
+            if 'id=' in line: 
+                in_dialogue = False
+                current_idx = line.split('id=')[1][:-1] 
+
+            if line in speaker_tags: 
+
+                in_dialogue = True
+
+                if line == "Doctor:\n":
+                    current_speaker = "doctor"
+                if line == "Patient:\n":
+                    current_speaker = "patient"
+                if line == "Description\n":
+                    current_speaker = "description"
+                
+                # current_speaker = next(speakers) # switch speaker
+                # f_out.write(f'{current_idx},{current_speaker},"') # Opening " mark of the next dialogue
+                df_dict['dialogue_id'].append(current_idx)
+                df_dict['speaker'].append(current_speaker)
                 start = True # Flag for start of the dialogue
                 continue
 
-            # Write to output file if there is a speaker
-            if current_speaker:
-                # Skip rows for patient
-                if current_speaker == 'patient':
-                    if line in ['Dialogue\n', 'Patient:\n', 'Description\n'] or line.startswith('https:'):  # Skip these rows
-                        continue
-
+            if in_dialogue:
                 # Get rid of unnecessary characters
                 line = re.sub(r'\n|([\.\,]{2,})', '', line).strip() # Drop \n and ....,,,,,
                 url_regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
@@ -68,23 +87,10 @@ def split_by_id_and_speaker(data_filename, output_filename):
                 for ending_word in ending_words[current_speaker]:
                     if ending_word in line:
                         line = line.split(ending_word)[0] # Drop the right-handed side of the ending word
-                        current_speaker = None
-                
-                # Skip blank string
-                if line == '': 
-                    if not current_speaker: closing_line()
-                    continue
 
-                # Write the dialogue
-                content_to_write = line if start else ' ' + line # If the speaker just starts speaking, don't add space
-                f_out.write(content_to_write) # Add space between each line of the dialogue (in case one dialogue has many lines)
-                start = False # Flip start to False after writing the speaker's first sentence
+                contexts.append(line)
 
-                # Write closing " and new line if the dialogue already finished (current_speaker == None)
-                if not current_speaker: closing_line()
-        # Last line check
-        if current_speaker: closing_line()
-
+        pd.DataFrame(df_dict).to_csv(output_filename, index=False)
 
 # Main loop
 if __name__ == '__main__':
