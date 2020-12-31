@@ -25,12 +25,14 @@ class ENMedicDialogueDataset(Dataset):
         patients: BatchEncoding,
         doctors: BatchEncoding,
         neg_samples: int = 9,
-        max_length: int = 256
+        max_length: int = 256,
+        evaluation: bool = False
     ):
         super().__init__()
         self.descriptions = descriptions.copy()
         self.patients = patients.copy()
         self.doctors = doctors.copy()
+        self.evaluation = evaluation
         print(len(self))
 
         # Usually description length might be shorter
@@ -65,6 +67,9 @@ class ENMedicDialogueDataset(Dataset):
             
         item = {key: torch.tensor([self.descriptions[key][idx], self.patients[key][idx]])
                 for key, val in self.descriptions.items()}
+        
+        if self.evaluation:
+            np.random.seed(idx)
         idxs = np.random.randint(0, self.__len__(), self.neg_samples)
 
         # (1 + neg_sample) x MAX_LENGTH tensor of doctor responses
@@ -158,11 +163,13 @@ def get_training_dev_test_dataset(debugging=False, max_length=256) -> Tuple[Batc
     )
     dev_loader = ENMedicDialogueDataset(
         **batchencoder_bucket['dev'],
-        max_length=max_length
+        max_length=max_length,
+        evaluation=True
     )
     test_loader = ENMedicDialogueDataset(
         **batchencoder_bucket['test'],
-        max_length=max_length
+        max_length=max_length,
+        evaluation=True
     )
 
     return train_loader, dev_loader, test_loader
