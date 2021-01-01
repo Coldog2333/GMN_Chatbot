@@ -11,14 +11,16 @@ warnings.filterwarnings('ignore')
 
 def split_by_id_and_speaker(data_filename, output_filename):
     """
-    Split dialogues by id and speaker (i.e., patient and doctor) with some cleaning
+    Split dialogues by id and speaker (i.e., Description, Patient and Doctor) with some cleaning
 
     Output filename format: each row is (idx, speaker, "dialogue")
     E.g.
-    0, patient0, "#description0 #patient0_dialogue"
-    0, doctor0, "#doctor0_dialogue"
-    1, patient1, "#description1 #patient1_dialogue"
-    1, doctor1, "#doctor1_dialogue"
+    0, Description0, "#description0"
+    0, Patient0, "#patient0_dialogue"
+    0, Doctor0, "#doctor0_dialogue"
+    1, Description1, "#description1"
+    1, Patient1, "#patient1_dialogue"
+    1, Doctor1, "#doctor1_dialogue"
     ...
     """
     # Available speakers (cycle for convenient switching)
@@ -96,7 +98,8 @@ def split_by_id_and_speaker(data_filename, output_filename):
 
                 contexts.append(line)
 
-        print(len(df_dict['dialogue_id']), len(df_dict['speaker']), len(df_dict['context']))
+        print(len(df_dict['dialogue_id']), len(
+            df_dict['speaker']), len(df_dict['context']))
         pd.DataFrame(df_dict).to_csv(output_filename, index=False)
 
 
@@ -106,11 +109,11 @@ def pretokenize_dataset() -> None:
     we tokenize the text and save them as objects
     '''
     files = [
-            "data/healthcaremagic_splitted_idname_1.csv",
-             "data/healthcaremagic_splitted_idname_2.csv",
-             "data/healthcaremagic_splitted_idname_3.csv",
-             "data/healthcaremagic_splitted_idname_4.csv",
-             "data/icliniq_splitted_idname.csv"]
+        "data/healthcaremagic_splitted_idname_1.csv",
+        "data/healthcaremagic_splitted_idname_2.csv",
+        "data/healthcaremagic_splitted_idname_3.csv",
+        "data/healthcaremagic_splitted_idname_4.csv",
+        "data/icliniq_splitted_idname.csv"]
 
     max_lengths = [256]
 
@@ -120,7 +123,8 @@ def pretokenize_dataset() -> None:
     for file in files:
         df = pd.read_csv(file)
         df.fillna('', inplace=True)
-        df_description = df[df.speaker == "description"].drop_duplicates('dialogue_id')
+        df_description = df[df.speaker ==
+                            "description"].drop_duplicates('dialogue_id')
         df_patient = df[df.speaker == "patient"].drop_duplicates('dialogue_id')
         df_doctor = df[df.speaker == "doctor"].drop_duplicates('dialogue_id')
         print(len(df_description), len(df_patient), len(df_doctor))
