@@ -11,11 +11,13 @@ MAX_TURN_NUM = 5
 
 
 class GMN(torch.nn.Module):
-    def __init__(self, emdedding_dim=768, use_bert=False):
+    def __init__(self, emdedding_dim=768, use_bert=False, freeze_bert=True):
         super(GMN, self).__init__()
         self.word_embedding = torch.nn.Embedding(num_embeddings=VOCAB_SIZE, embedding_dim=emdedding_dim)
 
         self.bert_representer = BERT_Representer() if use_bert else None
+        if freeze_bert:
+            self.bert_representer.eval()
 
         self.conv = gtorch.nn.GCNConv(in_channels=emdedding_dim, out_channels=10)
         self.cross_w = torch.nn.Parameter(torch.rand(size=[emdedding_dim, 10]))
