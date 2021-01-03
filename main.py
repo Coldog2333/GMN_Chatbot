@@ -9,6 +9,7 @@ from data_loader import load_data_from_file
 EPOCH = 10
 BATCH_SIZE = 2
 LEARNING_RATE = 1e-4
+DEVICE = 'cuda'
 
 
 def train(args):
@@ -16,7 +17,17 @@ def train(args):
 
     contexts, repsonses, contexts_graph_adjs, response_graph_adjs, labels = load_data_from_file(args.dir + 'data/from_2011_to_2019_split_by_idname.csv', tokenize=True)
 
-    net = GMN(emdedding_dim=768, use_bert=True)
+    # move tensors to the specified devices.
+    if DEVICE == 'cuda':
+        for tensor in [eval_contexts, eval_repsonses, eval_contexts_graph_adjs, eval_response_graph_adjs, eval_labels,
+                       contexts, repsonses, contexts_graph_adjs, response_graph_adjs, labels]:
+            tensor.cuda()
+    else:
+        for tensor in [eval_contexts, eval_repsonses, eval_contexts_graph_adjs, eval_response_graph_adjs, eval_labels,
+                       contexts, repsonses, contexts_graph_adjs, response_graph_adjs, labels]:
+            tensor.cpu()
+
+    net = GMN(emdedding_dim=768, use_bert=True).to(DEVICE)
     optimizer = torch.optim.Adam(net.parameters(), lr=LEARNING_RATE)
     loss_function = torch.nn.BCELoss()
 
@@ -62,7 +73,7 @@ def evaluate(net, contexts, repsonses, contexts_graph_adjs, response_graph_adjs,
 def debug(args):
     contexts, repsonses, contexts_graph_adjs, response_graph_adjs, labels = load_data_from_file(args.dir + 'data/2011_split_by_idname.csv', tokenize=True, read_case_num=10)
 
-    net = GMN(emdedding_dim=768, use_bert=True)
+    net = GMN(emdedding_dim=768, use_bert=True).to(DEVICE)
     optimizer = torch.optim.Adam(net.parameters(), lr=LEARNING_RATE)
     loss_function = torch.nn.BCELoss()
 

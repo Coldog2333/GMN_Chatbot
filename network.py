@@ -8,12 +8,13 @@ UNCASED = '/Users/jiangjunfeng/mainland/private/GMN_Chatbot/model/chinese_L-12_H
 VOCAB_SIZE = 21128
 MAX_SEQ_LEN = 50
 MAX_TURN_NUM = 5
+DEVICE = 'cuda'
 
 
 class GMN(torch.nn.Module):
     def __init__(self, emdedding_dim=768, use_bert=False, freeze_bert=True):
         super(GMN, self).__init__()
-        self.word_embedding = torch.nn.Embedding(num_embeddings=VOCAB_SIZE, embedding_dim=emdedding_dim)
+        self.word_embedding = torch.nn.Embedding(num_embeddings=VOCAB_SIZE, embedding_dim=emdedding_dim).to(DEVICE)
 
         self.bert_representer = BERT_Representer() if use_bert else None
         if freeze_bert:
