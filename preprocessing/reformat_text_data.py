@@ -153,8 +153,8 @@ def pretokenize_dataset() -> None:
 if __name__ == '__main__':
     # Health care magic
     for i in range(1, 5):
-        split_by_id_and_speaker(
-            f'data/healthcaremagic_dialogue_{i}.txt', f'data/healthcaremagic_splitted_idname_{i}.csv')
+        split_by_id_and_speaker(f'data/healthcaremagic_dialogue_{i}.txt',
+                                f'data/healthcaremagic_splitted_idname_{i}.csv')
     # Icliniq
     split_by_id_and_speaker('data/icliniq_dialogue.txt',
                             'data/icliniq_splitted_idname.csv')

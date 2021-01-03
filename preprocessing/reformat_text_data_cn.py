@@ -22,11 +22,12 @@ def split_by_id_and_speaker(data_filename, output_filename):
     ...
     """
     # Available speakers (cycle for convenient switching)
-    speaker_tags = ['医生：\n', '疾病：\n']
+    speaker_tags = ['医生：\n', '病人：\n', 'Description\n']
     # Dict containing words for starting and ending check for each speaker
     starting_words = dict(
         doctor=['Q. '],
         patient=['Q. '],
+        description=['Q. '],
     )
     ending_words = dict(
         doctor=[],
@@ -68,8 +69,10 @@ def split_by_id_and_speaker(data_filename, output_filename):
 
                 if line == '医生：\n':
                     current_speaker = "doctor"
-                if line == '疾病：\n':
+                if line == '病人：\n':
                     current_speaker = "patient"
+                if line == 'Description\n':
+                    current_speaker = "description"
 
                 # current_speaker = next(speakers) # switch speaker
                 # f_out.write(f'{current_idx},{current_speaker},"') # Opening " mark of the next dialogue
@@ -147,8 +150,8 @@ if __name__ == '__main__':
     for year in [2011,2012,2013,2015,2016,2017,2019,2020]:
         file = f"data/{year}.txt"
         if not os.path.isfile(f"data/{year}_split_by_idname.csv"):
-            split_by_id_and_speaker(
-                file, f"data/{year}_split_by_idname.csv")
+            split_by_id_and_speaker(file,
+                                    f"data/{year}_split_by_idname.csv")
 
     # From text to input index
     print('--------- Tokenizing the data ---------')
