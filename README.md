@@ -1,6 +1,6 @@
 # GMN Chatbot
 ## Introduction
-This is a repository for GMN-based Chatbot, which is our final project for the course: New Frontier Artificial Intelligence II at U-Tokyo.
+This is a repository for the chatbot based on Graph Matching Network (GMN), which is our final project for the course: New Frontier Artificial Intelligence II at U-Tokyo.
 ## Dataset
 We used the following English dialogues between patient and doctor to train our chatbot.
 
