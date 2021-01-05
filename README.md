@@ -2,7 +2,8 @@
 ## Introduction
 This is a repository for GMN-based Chatbot, which is our final project for U-Tokyo Course: New Frontier Artificial Intelligence II.
 ## Dataset
-Dialogues between patient and doctor.
+We used the following English dialogues between patient and doctor to train our chatbot.
+
 https://drive.google.com/drive/folders/1g29ssimdZ6JzTST6Y8g6h-ogUNReBtJD
 
 ## Dataloader
